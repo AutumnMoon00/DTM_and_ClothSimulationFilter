@@ -1,0 +1,89 @@
+first open user_inputs.py file
+    line 2: give the path to original point cloud laz file downloaded from PDOK website --> file_path
+    line 3: give the path to the directory where the clipped 500m x 500m point cloud and thinned point clouds should go --> output_dir
+    line 5: do nothing
+    line 6: give the left, bottom values of the 500m x 500m clipping area of interest --> left, bottom
+    line 7: give the left, bottom values of the 500m x 500m clipping area of interest --> right, top
+    line 8: for clipping to happen this "clipping" variable has to be boolean True, to turn clipping off, change it to False --> clipping
+
+    # inputs for thinning the data
+    line 13: True  # if False thinning is not done, only clipping is done --> thinning_boolean
+    line 14: give the type of thinning to be performed in a list  # ["nth_point", "random_percentage", "grid"] --> thinning_methods
+                # available thinnings "nth point", "random percentage", "grid"
+    line 15: give n_value for nth point thinning --> n_value
+    line 16: give the percentage for random percentage thinning --> percentage
+    line 17: give the grid resolution for grid thinning --> grid_resolution
+
+Now open points_extraction_and_thinning.py file, and run the code.
+This will create clipped and thinned point clouds in both laz and txt formats in the out_dir given in line 3.
+Now jump back to user_inputs.py file for cloth simulation.
+Cloth simulation user inputs start from line 21
+
+    line 21: give the output directory path to store the simulated cloth files --> cloth_out_dir
+    line 22: give the name of the clipped point cloud file (either in laz or txt) from output_dir (line 3) --> in_file_CSF
+    line 23: choose the cloth grid resolution --> cloth_resolution
+    line 24: choose the tension of the cloth --> tension
+
+Now open the CSV.py file and run it. A cloth is generated and the points are stored in x, y, z csv format on a txt file
+    in cloth_out_dir (line 21) folder.
+If another cloth with different parameters to be generated, simply change the values in lines 22, 23, 24 and
+    rerun the CSV.py file.
+
+
+Next we need to classify the points in point cloud based on cloth we simulated before
+if the point in cloud in within the threshold value (vertically) from the nearest cloth node then it is labelled as ground point
+Now jump back to user_inputs.py file for points classification.
+
+    line 27: give the output directory path to store the classified point could --> class_pt_dir
+    line 28: give just the cloth file name in cloth_out_dir (line 2) based upon which points to be classified --> ic_cloth_file
+    line 29: give the point cloud to be classified as ground and not ground --> pt_cld_to_classify
+                # ground classified as 2 and the rest as 0 in the output file
+    line 30: give the tolerance limit to classify points in point cloud as ground if they are within this threshold --> e_tol
+
+Now open the pt_cld_classification.py file and run it. Classified points are stored in laz and txt formats in the class_pt_dir (line 27)
+If you want different file to be classified based on different cloth just change the parameters in lines 28, 29, 30
+    and run the pt_cld_classification.py again.
+
+
+Next we need to generate DTM using ground points we classifed before using laplace interpolation at the resolution of 0.5m
+Now jump back to user_inputs.py file for laplace interpolation on ground classifed point cloud.
+
+    line 34: give the path to the folder where the classified point clouds are stored --> classified_ptcld_dir
+    line 35: give the point cloud file --> in_file_ptcld_for_laplace  # only laz file or las file
+    line 36: give path to a folder to store the created laplace interpolated DTM --> DTM_dir
+
+Now open the laplace_interpolation.py file and run it. The output file in txt format is stored in the above mentioned folder.
+If you want DTM from differnt point cloud just change the laz file in line 35 of user_inputs.py and run laplace_interpolation.py again.
+
+
+Next we need to create DTM from cloth that we've generated before by resampling it to finer resolution of 0.5m.
+We choose to regrid out cloth from 5m to 0.5m using Natural Neighbour Interpolation (nni)
+Now jump back to user_inputs.py.
+
+    line 39: give the name of the cloth file to be regridded --> in_cloth_file_for_nni
+    line 40: choose the grid resolution it has to be resampled to --> grid_resolution
+
+Now open the nni.py file and run it. The output file is automatically generated to cloth_out_dir (line 21).
+If you want another cloth to be resampled just change the cloth file name in line 39 and rerun nni.
+
+
+Finally, we have to compare the DTMs we've created among themselves, and with PDOK DTM as well.
+
+    line 44: DTM file1 name --> file_1  # if file is in .tif format give it only in line 44
+    line 45: DTM file2 name --> file_2  # only in .txt format
+
+Now open comparison_DTM_DTM.py if both the files to be compared are generated by us in previous steps.
+Or open comparison_PDOK_DTM.py if PDOK DTM has to be compared with one of our generated DTMs. To fill the gaps in PDOK DTM we've used laplace interpolatoion.
+The output is displayed on screen showing RMSE, NRMSE, R-squared, and Mutual information
+
+
+To conclude, we need to create isolines for any DTM
+Now jump back to user_inputs.py
+
+    line 49: choose a DTM file for which isolines should be generated --> fname_iso  # should be a txt file
+    line 50: contour step --> ci
+    line 51: starting contour level --> contour_start
+    line 52: final contour level --> contour_end
+
+ Now open isolines.py and run it. a txt file is created in the source directory which contains lines in wkt format
+ now open it in qgis to see the contours.
